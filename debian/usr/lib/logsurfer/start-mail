@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# We have to invoke a mailer that has no escape possibilities...
+#
+# The only one I know of would be sendmail, but this is very ugly
+# to invoke directly because we have no control of To: and
+# Subject: lines...
+#
+# This wrapper writes some of the Header-Fields before forwarding the
+# mail itself in the body
+#
+# usage: start-mail [mailaddr [subject]]
+
+
+if [ -r /etc/default/logsurfer ]; then
+        . /etc/default/logsurfer
+else
+	MAIL_TO=root
+	MAIL_SENDER=logsurfer@localhost
+	MAIL_SUBJECT='(no subject given - logsurfer output)'
+	GPG_SIGN=no
+	GPG_ENCRYPT=no
+fi
+
+
+if [ $# -eq 1 ]; then
+	if [ $1 = "--help" ]; then
+	echo 'usage: start-mail [mailaddr [subject]]' 1>&2
+	exit 1
+	fi
+fi
+
+if [ $# -eq 0 ]; then
+	to=$MAIL_TO
+else
+	to=`echo $1 | /usr/bin/tr -cd '[\040-\176]'`
+fi
+
+if [ $# -gt 1 ]; then
+	shift
+	subject=`echo  $* | /usr/bin/tr -cd '[\040-\176]'`
+else
+	subject=$MAIL_SUBJECT
+fi
+
+#GPG_XXX is necessary, to quote a recipient name with space in it.
+#It must contain something in the other two cases as well, to
+#avoid having a "" argument at the end.
+if [ $GPG_SIGN = "yes" ]; then
+	if [ $GPG_ENCRYPT = "yes" ]; then
+		GPG_CMD='gpg --sign --encrypt --armor --homedir /var/lib/logsurfer --local-user Logsurfer --recipient '
+		GPG_XXX="$GPG_RECIPIENT"
+	else
+		GPG_CMD="gpg --clearsign --homedir /var/lib/logsurfer --local-user"
+		GPG_XXX=Logsurfer
+	fi
+else
+	GPG_CMD=
+	GPG_XXX=cat
+fi
+#
+# As a failed password from an invalid user is often caused by typing the password
+# instead of the username, it is filtered out for not sending passwords in the clear,
+# because sshd cannot be asked to do so.
+#
+
+sed -e 's/\(sshd\[[0-9]\+\]\): Invalid user .* from/\1: Invalid user XXX from/g
+s/\(sshd\[[0-9]\+\]\): Failed none for invalid user .* from/\1: Failed none for invalid user XXX from/g
+s/\(sshd\[[0-9]\+\]\): Failed password for invalid user .* from/\1: Failed password for invalid user XXX from/g' | $GPG_CMD "$GPG_XXX" | sed -e '1i\
+From: '"$MAIL_SENDER"'\
+To: '"$to"'\
+Subject: '"$subject"'\
+
+' | /usr/lib/sendmail -odq -t -i

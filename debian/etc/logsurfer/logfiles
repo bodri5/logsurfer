@@ -1,0 +1,13 @@
+#logfiles to monitior
+/var/log/auth.log
+/var/log/messages
+/var/log/apache2/access.log
+/var/log/apache2/error.log
+/var/log/apache2/ssl_access.log
+/var/log/slurm-llnl/slurmctld.log
+/var/log/slurm-llnl/slurmd.log
+/var/log/kern.log
+/var/log/mail.info
+/var/log/mail.err
+/var/log/mail.warn
+/var/log/syslog

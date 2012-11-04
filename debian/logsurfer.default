@@ -1,0 +1,28 @@
+#logsurfer configuration options
+
+#Address to send logsurfer reports
+MAIL_TO=root
+
+#Sender of logsurfer mail
+MAIL_SENDER=logsurfer@localhost
+
+#Subject of logsurfer mail
+MAIL_SUBJECT='logsurfer report'
+
+#Weather to GPG sign the mail
+#Before setting it to true, create a new key by a script like this:
+#$ gpg --homedir /var/lib/logsurfer --gen-key --batch <<EOF
+#> Key-Type: DSA
+#> Key-Length: 2048
+#> Name-Real: Logsurfer
+#> EOF
+#$ chown logsurfer:logsurfer /var/lib/logsurfer/*.gpg /var/lib/logsurfer/pubring.gpg~ /var/lib/logsurfer/random_seed
+#
+GPG_SIGN=no
+
+#Weather to GPG encrypt the mail (only effective, if GPG_SIGN=yes)
+GPG_ENCRYPT=no
+
+#GPG key Id of the recipient
+#must be imported by gpg --homedir /var/lib/logsurfer ...
+GPG_RECIPIENT="User User"

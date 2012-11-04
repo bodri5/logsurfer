@@ -1,0 +1,18 @@
+#!/bin/sh
+
+LSROOT=/etc/logsurfer
+
+umask 027
+
+LOGFILES=`grep -v '#' $LSROOT/logfiles | tr '\n' ' '`
+
+sed -f $LSROOT/rules.sed $LSROOT/rules-first.conf >/var/lib/logsurfer/whole.conf
+if [ -n "`ls $LSROOT/rules.d/*.conf 2>/dev/null`" ]
+then
+  sed -f $LSROOT/rules.sed `ls $LSROOT/rules.d/*.conf` >>/var/lib/logsurfer/whole.conf
+fi
+sed -f $LSROOT/rules.sed $LSROOT/rules-last.conf >>/var/lib/logsurfer/whole.conf
+
+##trap "kill -15 -$$" SIGTERM
+
+tail --pid $$ -q -F $LOGFILES | /usr/bin/logsurfer -c /var/lib/logsurfer/whole.conf

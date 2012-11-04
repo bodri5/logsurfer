@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# mail
+
+set -e
+set -u
+
+[ -e /usr/lib/logsurfer/start-mail ] || exit 0
+
+if [ -r /etc/default/logsurfer ]; then
+	. /etc/default/logsurfer
+fi
+
+if [ -r /var/lib/logsurfer/hourly.log ]; then
+	mv /var/lib/logsurfer/hourly.log /var/lib/logsurfer/hourly.mail
+	su -s /bin/sh logsurfer /usr/lib/logsurfer/start-mail < /var/lib/logsurfer/hourly.mail
+fi
+

@@ -9,7 +9,7 @@ set -u
 
 if [ -r /etc/default/logsurfer ]; then
 	. /etc/default/logsurfer
-	if [ ! "$SEND_HOURLY_MAIL" = "yes"]; then
+	if [ ! "$SEND_HOURLY_MAIL" = "yes" ]; then
 		exit 0;
 	fi
 fi

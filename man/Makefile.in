@@ -18,7 +18,7 @@ logsurfer.conf.4: logsurfer.conf.4.in
 
 install:
 	$(INSTALL_DATA) logsurfer.1 $(mandir)/man1/logsurfer.1
-	$(INSTALL_DATA) logsurfer.conf.4 $(mandir)/man4/logsurfer.conf.4
+	$(INSTALL_DATA) logsurfer.conf.4 $(mandir)/man5/logsurfer.conf.5
 
 clean:
 	$(RM) logsurfer.1 logsurfer.conf.4

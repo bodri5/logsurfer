@@ -22,7 +22,7 @@ DEF_DUMPFILE = /dev/null
 #    to use the ugly sendmail hack (see README)
 #   -DWARN_ROOT
 #    print a warning if the program is started as root (see README)
-CPPFLAGS = -DVERSION=\"$(version)\" -DWARN_ROOT
+CPPFLAGS = -DVERSION=\"$(version)\" -DWARN_ROOT @CPPFLAGS@
 
 # Which C-Compiler?
 CC = @CC@

@@ -344,12 +344,12 @@ logsurfer_exit(sig)
 		(void) fprintf(stderr, "cleaning up memory...\n");
 	cleanup_memory();
 
-	/* wait for childs */
+	/* wait for children */
 	child_retry=0;
 	while ( (waitpid((pid_t) -1, NULL, WNOHANG) >= 0) && (child_retry < 4) ) {
 		if (!exit_silent)
 			(void) fprintf(stderr,
-				"waiting for childs (retry #%d)...\n", ++child_retry);
+				"waiting for children (retry #%d)...\n", ++child_retry);
 		(void) sleep(5);
 		while (waitpid((pid_t) -1, NULL, WNOHANG) > 0)
 			;

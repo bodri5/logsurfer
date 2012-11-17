@@ -1,3 +1,14 @@
+logsurfer (1.8-1~rc7) UNRELEASED; urgency=low
+
+  * start-mail options modified
+  * preprocessor uses extended regular expressions
+  * new macros
+  * added rules for logsurfer and sysstat
+  * logsurfer.wrapper resumes reading logfiles where it left last time
+  * LS_DAEMON_T introduced
+
+ -- Bodor Andras <bodri.mh3@gmail.com>  Sun, 11 Nov 2012 19:54:41 +0100
+
 logsurfer (1.8-1~rc1) unstable; urgency=low
 
   * Initial release (Closes: #670875)

@@ -13,3 +13,78 @@ Setting up logsurfer with cron
 Another way to run logsurfer is to use cron. While you won't have real-time
 monitoring, it could be appropriate in some cases. Remember that logsurfer will
 scan the whole file on each run.
+
+The default behaviour of logsurfer is inspired by logcheck.
+A wrapper script (/usr/lib/logsurfer/logsurfer.wrapper) is
+started on boot by init scripts. This wrapper first assembles
+a configuration file for logsurfer, by prepocessing config
+files /etc/logsurfer/rules-first.conf then the *.conf files
+in  /etc/logsurfer/rules.d finally  /etc/logsurfer/rules-last.conf.
+/etc/logsurfer/rules.d is the place, where packages and administrators
+can place specific config files. The files are processed by
+sed, for which the sed program is in /etc/logsurfer/rules.sed.
+This includes a few macro substitution, like $LS_TSTAMP which
+expands to the typical beginning of a log line in /var/log/messages.
+It is to be further expanded and documented  before the release of this
+package. The created config file is stores in /var/lib/logsurfer/whole.conf
+ Then the logfiles listed in /etc/logsurfer/logfiles (lines strarted by #
+are ignored) are opened in follow mode and fed into the logsurfer
+binary. In the current implementation it is done by a separate tail -F command
+for every logfile. The wrapper script keeps an account of the
+line numbers in /var/lib/logsurfer/logfiles.state where it
+last time stopped processing, and resumes operation at that position.
+Log rotation is not yet handled. The logfiles are piped through
+sed, to prepend the filename to each line. (In an advanced version
+this task should be done by a single executeable instead of a series
+of tails and seds.)
+ In the default configuration rules-last.conf contains a single
+rule, that any logline not explicitly handled so far is written
+into /var/lib/logsurfer/hourly.log. The contents of this file
+is mailed hourly by a cron job to the administrator (root, if not
+modified).
+
+
+For reference, a short description of the files in the package
+
+/etc/default/logsurfer: configuration values for the package
+  like e-mail address of the administrator and weather to
+  GPG encrypt the messages
+
+/etc/init.d/logsurfer: script to start and stop logsurfer
+  Mostly reused /etc/init.d/skeleton
+
+/usr/lib/logsurfer/logsurfer.wrapper: a shell wrapper around
+  the executable. See above.
+
+/etc/logsurfer/rules-first.conf: contains the rules, to apply first.
+   Currently periodically touches a file, /var/lib/logsurfer/heartbeat.txt.
+
+/etc/logsurfer/rules-last.conf: contains the rules, to apply last.
+  Currently there is one rule, which appends everything that
+  survived the previous rules to /var/lib/logsurfer/hourly.log
+
+/etc/logsurfer/rules.d: directory for other packages to drop
+   their rules. There are a few examples inside.
+
+/etc/logsurfer/rules.sed: sed program to process the config
+   files. Currently a few macros are substituted, like $LS_TSTAMP for
+   the standard syslog timestamp, and $LS_IP4ADDR for an ipv4
+   address. This can largely simplify the config files.
+
+/usr/lib/logsurfer/start-mail: script to send mail in a secure
+   manner. Optionally it can GPG sign or encrypt the mail.
+
+/etc/logsurfer/logfiles: list of logfiles to monitor. One file
+   per line, lines beginning with # are ignored
+
+/etc/cron.houry/logsurfer: cron job, to send the content of
+   /var/lib/logsurfer/hourly.log by email. It can be disabled
+   via /etc/default/logsurfer
+
+/debian/postinst: debian postinst script. It creates logsurfer
+   user account, the directory /var/lib/logsurfer, and
+   intalls links to the init script. Mainly created by debhelper
+
+/debian/postrm: script to purge the package. Removes /var/lib/logsurfer,
+  and does other things debhelper told it to do.
+

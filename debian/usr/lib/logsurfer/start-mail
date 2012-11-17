@@ -9,39 +9,54 @@
 # This wrapper writes some of the Header-Fields before forwarding the
 # mail itself in the body
 #
-# usage: start-mail [mailaddr [subject]]
+usage() {
+  echo 'usage: start-mail [-t mailaddr][-s subject][-D]' 1>&2
+  echo '-D:  debug, send output to stdout'
+  exit 1
+}
 
 
 if [ -r /etc/default/logsurfer ]; then
         . /etc/default/logsurfer
 else
-	MAIL_TO=root
-	MAIL_SENDER=logsurfer@localhost
-	MAIL_SUBJECT='(no subject given - logsurfer output)'
-	GPG_SIGN=no
-	GPG_ENCRYPT=no
+  MAIL_TO=root
+  MAIL_SENDER=logsurfer@localhost
+  MAIL_SUBJECT='(no subject given - logsurfer output)'
+  GPG_SIGN=no
+  GPG_ENCRYPT=no
 fi
 
 
 if [ $# -eq 1 ]; then
-	if [ $1 = "--help" ]; then
-	echo 'usage: start-mail [mailaddr [subject]]' 1>&2
-	exit 1
-	fi
+  if [ $1 = "--help" ]; then
+    usage
+  fi
 fi
 
-if [ $# -eq 0 ]; then
-	to=$MAIL_TO
-else
-	to=`echo $1 | /usr/bin/tr -cd '[\040-\176]'`
-fi
+SENDMAIL_CMD="/usr/lib/sendmail -odq -t -i"
 
-if [ $# -gt 1 ]; then
-	shift
-	subject=`echo  $* | /usr/bin/tr -cd '[\040-\176]'`
-else
-	subject=$MAIL_SUBJECT
-fi
+while getopts ":t:s:D" opt; do
+  case $opt in
+    t)
+      MAIL_TO=`echo $OPTARG | /usr/bin/tr -cd '[\040-\176]'`
+      ;;
+    s)
+      MAIL_SUBJECT=`echo  $OPTARG | /usr/bin/tr -cd '[\040-\176]'`
+      ;;
+    D)
+      SENDMAIL_CMD=cat
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      usage
+      ;;
+  esac
+done
+
 
 #GPG_XXX is necessary, to quote a recipient name with space in it.
 #It must contain something in the other two cases as well, to
@@ -58,17 +73,17 @@ else
 	GPG_CMD=
 	GPG_XXX=cat
 fi
+
 #
 # As a failed password from an invalid user is often caused by typing the password
 # instead of the username, it is filtered out for not sending passwords in the clear,
 # because sshd cannot be asked to do so.
 #
-
 sed -e 's/\(sshd\[[0-9]\+\]\): Invalid user .* from/\1: Invalid user XXX from/g
 s/\(sshd\[[0-9]\+\]\): Failed none for invalid user .* from/\1: Failed none for invalid user XXX from/g
 s/\(sshd\[[0-9]\+\]\): Failed password for invalid user .* from/\1: Failed password for invalid user XXX from/g' | $GPG_CMD "$GPG_XXX" | sed -e '1i\
 From: '"$MAIL_SENDER"'\
-To: '"$to"'\
-Subject: '"$subject"'\
+To: '"$MAIL_TO"'\
+Subject: '"$MAIL_SUBJECT"'\
 
-' | /usr/lib/sendmail -odq -t -i
+' | $SENDMAIL_CMD

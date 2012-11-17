@@ -1,5 +1,8 @@
 #logsurfer configuration options
 
+#Weather to send hourly mail
+SEND_HOURLY_MAIL=yes
+
 #Address to send logsurfer reports
 MAIL_TO=root
 

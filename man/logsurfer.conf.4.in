@@ -2,7 +2,7 @@
 .\" written by W. Ley, U. Ellermann, and K. Thompson
 .\"
 .\" @(#) $Header: logsurfer.1,v 
-.TH LOGSURFER 4  "Thu Oct 19 1995"
+.TH LOGSURFER 5  "Thu Oct 19 1995"
 .SH NAME
 logsurfer.conf \- configuration file for logsurfer
 .SH SYNOPSIS
@@ -297,7 +297,7 @@ next to "-") and no timeout (the "0"). For each message line it invokes
 the external command "/bin/echo" with the complete message line as an
 argument. The result will be, that every input line is echoed to the
 standard output. If you put the example line in a file called "testconf"
-then you might want to use "logsurfer -c testconf" to start the logsurfer
+then you might want to use "logsurfer \-c testconf" to start the logsurfer
 program with this configuration file. Every line you type in should be
 echoed.
 .LP
